@@ -107,21 +107,12 @@
     @"items": items,
   };
 
-  NSString *lastDataType = @"";
-
   for (NSItemProvider* itemProvider in ((NSExtensionItem*)self.extensionContext.inputItems[0]).attachments) {
     [self debug:[NSString stringWithFormat:@"item provider registered indentifiers = %@", itemProvider.registeredTypeIdentifiers]];
 
     // MOVIE
     if ([itemProvider hasItemConformingToTypeIdentifier:@"public.movie"]) {
       [self debug:[NSString stringWithFormat:@"item provider = %@", itemProvider]];
-
-      if (([lastDataType length] > 0) && ![lastDataType isEqualToString:@"FILE"]) {
-        --remainingAttachments;
-        continue;
-      }
-
-      lastDataType = [NSString stringWithFormat:@"FILE"];
 
       [itemProvider loadItemForTypeIdentifier:@"public.movie" options:nil completionHandler: ^(NSURL* item, NSError *error) {
         NSString *fileUrl = [self saveFileToAppGroupFolder:item];
@@ -158,13 +149,6 @@
     // IMAGE
     else if ([itemProvider hasItemConformingToTypeIdentifier:@"public.image"]) {
       [self debug:[NSString stringWithFormat:@"item provider = %@", itemProvider]];
-
-      if (([lastDataType length] > 0) && ![lastDataType isEqualToString:@"FILE"]) {
-        --remainingAttachments;
-        continue;
-      }
-
-      lastDataType = [NSString stringWithFormat:@"FILE"];
 
       [itemProvider loadItemForTypeIdentifier:@"public.image" options:nil completionHandler: ^(id<NSSecureCoding> data, NSError *error) {
         NSString *fileUrl = @"";
@@ -224,13 +208,6 @@
     else if ([itemProvider hasItemConformingToTypeIdentifier:@"public.file-url"]) {
       [self debug:[NSString stringWithFormat:@"item provider = %@", itemProvider]];
 
-      if (([lastDataType length] > 0) && ![lastDataType isEqualToString:@"FILE"]) {
-        --remainingAttachments;
-        continue;
-      }
-
-      lastDataType = [NSString stringWithFormat:@"FILE"];
-
       [itemProvider loadItemForTypeIdentifier:@"public.file-url" options:nil completionHandler: ^(NSURL* item, NSError *error) {
         NSString *fileUrl = [self saveFileToAppGroupFolder:item];
         NSString *suggestedName = item.lastPathComponent;
@@ -267,13 +244,6 @@
     else if ([itemProvider hasItemConformingToTypeIdentifier:@"public.url"]) {
       [self debug:[NSString stringWithFormat:@"item provider = %@", itemProvider]];
 
-      if ([lastDataType length] > 0 && ![lastDataType isEqualToString:@"URL"]) {
-        --remainingAttachments;
-        continue;
-      }
-
-      lastDataType = [NSString stringWithFormat:@"URL"];
-
       [itemProvider loadItemForTypeIdentifier:@"public.url" options:nil completionHandler: ^(NSURL* item, NSError *error) {
         [self debug:[NSString stringWithFormat:@"public.url = %@", item]];
 
@@ -298,13 +268,6 @@
     // TEXT
     else if ([itemProvider hasItemConformingToTypeIdentifier:@"public.text"]) {
       [self debug:[NSString stringWithFormat:@"item provider = %@", itemProvider]];
-
-      if ([lastDataType length] > 0 && ![lastDataType isEqualToString:@"TEXT"]) {
-        --remainingAttachments;
-        continue;
-      }
-
-      lastDataType = [NSString stringWithFormat:@"TEXT"];
 
       [itemProvider loadItemForTypeIdentifier:@"public.text" options:nil completionHandler: ^(NSString* item, NSError *error) {
         [self debug:[NSString stringWithFormat:@"public.text = %@", item]];
