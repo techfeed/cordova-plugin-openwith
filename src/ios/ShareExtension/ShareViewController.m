@@ -166,20 +166,42 @@
 
       lastDataType = [NSString stringWithFormat:@"FILE"];
 
-      [itemProvider loadItemForTypeIdentifier:@"public.image" options:nil completionHandler: ^(NSURL* item, NSError *error) {
-        NSString *fileUrl = [self saveFileToAppGroupFolder:item];
-        NSString *suggestedName = item.lastPathComponent;
-
+      [itemProvider loadItemForTypeIdentifier:@"public.image" options:nil completionHandler: ^(id<NSSecureCoding> data, NSError *error) {
+        NSString *fileUrl = @"";
+        NSString *suggestedName = @"";
         NSString *uti = @"public.image";
-        NSString *registeredType = nil;
+        NSString *mimeType = @"";
 
-        if ([itemProvider.registeredTypeIdentifiers count] > 0) {
-          registeredType = itemProvider.registeredTypeIdentifiers[0];
-        } else {
-          registeredType = uti;
+        if([(NSObject*)data isKindOfClass:[UIImage class]]) {
+          UIImage* image = (UIImage*) data;
+
+          if (image != nil) {
+            NSURL *targetUrl = [[self.fileManager containerURLForSecurityApplicationGroupIdentifier:SHAREEXT_GROUP_IDENTIFIER] URLByAppendingPathComponent:@"share.png"];
+            NSData *binaryImageData = UIImagePNGRepresentation(image);
+
+            [binaryImageData writeToFile:[targetUrl.absoluteString substringFromIndex:6] atomically:YES];
+            fileUrl = targetUrl.absoluteString;
+            suggestedName = targetUrl.lastPathComponent;
+            mimeType = @"image/png";
+          }
         }
 
-        NSString *mimeType =  [self mimeTypeFromUti:registeredType];
+        if ([(NSObject*)data isKindOfClass:[NSURL class]]) {
+          NSURL* item = (NSURL*) data;
+          NSString *registeredType = nil;
+
+          fileUrl = [self saveFileToAppGroupFolder:item];
+          suggestedName = item.lastPathComponent;
+
+          if ([itemProvider.registeredTypeIdentifiers count] > 0) {
+            registeredType = itemProvider.registeredTypeIdentifiers[0];
+          } else {
+            registeredType = uti;
+          }
+
+          mimeType = [self mimeTypeFromUti:registeredType];
+        }
+
         NSDictionary *dict = @{
           @"text" : self.contentText,
           @"fileUrl" : fileUrl,
